@@ -14,7 +14,7 @@ int command(char context[STR_LENGTH]) {
     return -1;  // type error
 }
 
-int main() {
+int main(int argc, char argv[]) {
     // initiate list and insert input
     linkedList *list; initList(&list);
     FILE *inpt = fopen("input.txt", "r");

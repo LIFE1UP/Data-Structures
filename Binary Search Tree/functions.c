@@ -1,104 +1,88 @@
 #include "BST.h"
 
-int bin_search(node **curr, int key, int cnt, node **found) {
-    // found: cnt, end: 0, error: -1
-    if (*curr == NULL) {
-        return -1;
-    }
-    
-    if ((*curr)->key == key) {
-        return cnt;
-    }
-    
-    if ((*curr)->key < key) {
-        if ((*curr)->right == NULL) {
-            *found = *curr; return 0;
-        }
-        
-        return bin_search((*curr)->right, key, cnt + 1, found);
-    } else {
-        if ((*curr)->left == NULL) {
-            *found = *curr; return 0;
-        }
-        
-        return bin_search((*curr)->left, key, cnt + 1, found);
-    }
-}
+void tree_init(tree *target, void (*destroy_fn)(void *data)) { target->size = 0; target->destroy = destroy_fn; target->root = NULL; return; }
 
-int insert(tree **root, int key, void *data, void (*destroy)(void *data)) {
-    if ((*root)->head == NULL) {
-        node* new_node = (node *)malloc(sizeof(node));
-        left(new_node) = NULL; right(new_node) = NULL; destroy(new_node) = destroy; key(new_node) = key; data(new_node) = data;
-        tree_head((*root)) = new_node;
-        
-        return 1;
-    }
+void tree_destory(tree *target) { tree_rem_left(target, NULL); memset(target, 0, sizeof(tree)); return; }
 
-    int place; node *curr = (*root)->head, *found;
-    if ((place = bin_search(&curr, key, 1, &found)) == 0) {
-        node* new_node = (node *)malloc(sizeof(node)); left(new_node) = NULL; right(new_node) = NULL; destroy(new_node) = destroy; key(new_node) = key; data(new_node) = data;
+int tree_ins_left(tree *target, node *parent, const void *content) {
+    node *new, **position;
 
-        if (found->key < key) {
-            right(found) = new_node;
-        } else {
-            left(found) = new_node;
-        }
+    if ( parent == NULL ) {  // empty root
+        if (size(target) > 0) { printf("someting is wrong\n"); return -1; }
+        position = &(target->root); }
 
-        return 1;
-    }
+    if ( left(parent) != NULL ) { return -1; }
+
+    position = &parent->left;
+    if ( ( new = (node *)malloc(sizeof(node)) ) == NULL ) {
+        (new->data) = (void *)content; (target->size)++;
+        new->left = NULL; new->right = NULL;
+        *position = new;
+        return 0;
+    }  // insertion
 
     return -1;
-}
+}  // tree_ins_left(): return 0 when successes otherwise -1
 
-int search(tree **root, int key, void **data_ptr) {
-    if ((*root)->head == NULL) {
-        printf("\btree is empty\n");
-        return -1;
-    }
+int tree_ins_right(tree *target, node *parent, const void *content) {
+    node *new, **position;
 
-    int place; node *found;
-    if ((place = bin_search((*root)->head, key, 1, &found)) > 0) {
-        *data_ptr = data(found);
+    if ( parent == NULL ) {
+        if ( size(target) > 0 ) { printf("something is wrong\n"); return -1; }
+        position = &(target->root);
+    } // first insertion
+    
+    if ( right(parent) != NULL ) { return -1; }  // already exsit
 
-        printf("\bfound at %d\n", place); return place;
-    } else {
-        printf("\bcouldn't find\n", place); return -1;
-    }
-}
+    position = &parent->right;
+    if ( ( new = (node *)malloc(sizeof(node)) ) == NULL ) {
+        new->data = (void *)content; (target->size)++;
+        new->left = NULL; new->right = NULL;
+        *position = new;
+        return 0;
+    } // insertion
 
-int delete(tree **root, int key) {
-    int place = bin_search((*root)->head, key, 1, &found); node *found;
-    if (place == 0) {
-        if (found->key < key) {
-            free(found->right); right(found) = NULL;
-        } else {
-            free(found->left); left(found) = NULL;
-        }
+    return -1;
+}  // tree_ins_right(): return 0 when successes otherwise -1
 
-        printf("%d got deleted", key); return 1;
-    }
+void tree_rem_left(tree *target, node *parent) {
+    if ( size(target) == 0 ) { return; }
 
-    node *curr;
-    if (place > 0) {
-        if (found->key < key) {
-            curr = right(found);
+    node **position;
 
-            if ((*curr)->left == NULL && (*found)->right != NULL) {
-                right(found) = right(curr);
-            } else if ((*curr)->left != NULL && (*found)->right == NULL) {
-                left(found) = left(curr);
-            }
-        } else {
-            curr = left(found);
+    if ( parent == NULL ) { position = &(target->root); }
+    else { position = &(parent->left); }
 
-            if ((*curr)->left == NULL && (*found)->right != NULL) {
-                free(curr->right);
-                right(found) = right(curr);
-            } else if ((*curr)->left != NULL && (*found)->right == NULL) {
-                free(curr->left);
-                left(found) = left(curr);
-            }
-        }
-        
-    }
-}
+    /* important */
+    if ( *position != NULL ) {
+        tree_rem_left(target, *position); tree_rem_right(target, *position);
+
+        if ( target->destroy != NULL ) { target->destroy( (*position)->data ); }  // when destroy is not defined
+
+        free(*position); *position = NULL;
+        (target->size)--;
+    }  // left is not empty
+
+    return;
+}  // tree_rem_left(): destroy every child of left
+
+void tree_rem_right(tree *target, node *parent) {
+    if ( size(target) == 0 ) { return; }
+
+    node **position;
+
+    if ( parent == NULL ) { position = &(target->root); }
+    else { position = &(parent->right); }
+
+    /* important */
+    if ( *position != NULL ) {
+        tree_rem_left(target, *position); tree_rem_right(target, *position);
+
+        if ( target->destroy != NULL ) { target->destroy( (*position)->data ); }  // when destroy is not defined
+
+        free(*position); *position = NULL;
+        (target->size)--;
+    }  // right is not empty
+
+    return;
+}  // tree_rem_left(): destroy every child of right
