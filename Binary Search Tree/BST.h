@@ -26,9 +26,9 @@ typedef struct Tree {
 
 void tree_init(tree *target, void (*destroy_fn)(void *data));
 void tree_destory(tree *target);
-int tree_ins_left(tree *target, node *parent, const void *data);
-int tree_ins_right(tree *target, node *parent, const void *data);
-void tree_rem_left(tree *target, node *parent);
-void tree_rem_right(tree *target, node *parent);
+extern inline int tree_ins_left(tree *target, node *parent, const void *data);
+extern inline int tree_ins_right(tree *target, node *parent, const void *data);
+extern inline void tree_rem_left(tree *target, node *parent);
+extern inline void tree_rem_right(tree *target, node *parent);
 
 #endif

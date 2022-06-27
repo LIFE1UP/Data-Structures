@@ -4,7 +4,7 @@ void tree_init(tree *target, void (*destroy_fn)(void *data)) { target->size = 0;
 
 void tree_destory(tree *target) { tree_rem_left(target, NULL); memset(target, 0, sizeof(tree)); return; }
 
-int tree_ins_left(tree *target, node *parent, const void *content) {
+extern inline int tree_ins_left(tree *target, node *parent, const void *content) {
     node *new, **position;
 
     if ( parent == NULL ) {  // empty root
@@ -24,7 +24,7 @@ int tree_ins_left(tree *target, node *parent, const void *content) {
     return -1;
 }  // tree_ins_left(): return 0 when successes otherwise -1
 
-int tree_ins_right(tree *target, node *parent, const void *content) {
+extern inline int tree_ins_right(tree *target, node *parent, const void *content) {
     node *new, **position;
 
     if ( parent == NULL ) {
@@ -45,7 +45,7 @@ int tree_ins_right(tree *target, node *parent, const void *content) {
     return -1;
 }  // tree_ins_right(): return 0 when successes otherwise -1
 
-void tree_rem_left(tree *target, node *parent) {
+extern inline void tree_rem_left(tree *target, node *parent) {
     if ( size(target) == 0 ) { return; }
 
     node **position;
@@ -66,7 +66,7 @@ void tree_rem_left(tree *target, node *parent) {
     return;
 }  // tree_rem_left(): destroy every child of left
 
-void tree_rem_right(tree *target, node *parent) {
+extern inline void tree_rem_right(tree *target, node *parent) {
     if ( size(target) == 0 ) { return; }
 
     node **position;

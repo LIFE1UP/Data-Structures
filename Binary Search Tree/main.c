@@ -1,7 +1,7 @@
 #include "BST.h"
 
 // define data type and destroy of it
-void destroy(void *target) { int *dummy = (int *)target; free(dummy); }
+inline void destroy(void *target) { int *dummy = (int *)target; free(dummy); }
 void print_node(node *target) { int *dummy = (int *)target->data; printf("%d\n", *dummy); }
 
 int main(int argc, char argv[]) {
