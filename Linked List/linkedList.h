@@ -6,18 +6,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-typedef struct Listdata {
-    char name[30];
-    int id;
-} listData;
-
 typedef struct Listnode {
-    listData data;
+    void *data;
     struct Listnode* link;
 } listNode;
 
 typedef struct LinkedList {
-    listNode *head;
+    listNode *head, *tail;
     int length;
 }linkedList;
 
@@ -27,6 +22,7 @@ typedef struct LinkedList {
 #define link(node) node->link
 #define head(list) list->head
 #define length(list) list->length
+#define 
 
 int seq_search(listNode *curr, int target, listNode **prev);
 void initList(linkedList **list_p);
