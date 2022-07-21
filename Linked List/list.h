@@ -1,3 +1,6 @@
+#ifndef LIST_H
+#define LIST_H
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -32,3 +35,5 @@ int list_size(const List *list);
 #define list_is_tail(list, element) (element == list->tail) ? 1 : 0
 #define list_data(element) element->data
 #define list_next(element) element->next
+
+#endif
