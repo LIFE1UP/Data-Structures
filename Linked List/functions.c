@@ -1,80 +1,82 @@
-#include "linkedList.h"
+#include "list.h"
 
-extern inline int seq_search(listNode *curr, int target, listNode **prev) {
-    if (curr == NULL) {return -1;}  // not found
-    if ((curr->data).id == target) {return 1;}  // found
-    *prev = curr;
-    return seq_search(curr->link, target, prev);
-}  // sequential search, head to tail
+void list_init(List *list, void (*destroy)(void *data)) {
+    list->size = 0;
+    list->destroy = destroy;
+    list->head = NULL; list->tail = NULL;
 
-void initList(linkedList **list_p) {*list_p = (linkedList *)malloc(sizeof(linkedList)); head((*list_p)) = NULL; length((*list_p)) = 0; return;}
-
-void printList(linkedList *list) {
-    if (list->head == NULL) {printf("empty list\n"); return;}
-
-    listNode *curr = head(list);
-    while (curr != NULL) {printf("name: %s id: %d\n", (curr->data).name, (curr->data).id); curr = link(curr);}
-}  // print every labels
-
-listNode *search(linkedList *list, int target) {
-    if (list->head == NULL) {printf("empty list\n"); return NULL;}
-    if ((list->head->data).id == target) {return head(list);}
-
-    int error; listNode *prev, *curr = head(list);
-    if ((error = seq_search(list->head, target, &prev)) >= 0) {
-        return link(prev);  // found
-    } else {printf("couln't found the taget\n"); return NULL;}  // not found
-}  // process the result of seq_search
-
-int insert(linkedList *list, listNode *pre, listData *data) {
-    // custom insert by human
-    if (pre != NULL) {
-        listNode *new = (listNode *)malloc(sizeof(listNode)); data(new) = *data;
-        link(new) = link(pre); link(pre) = new;
-        length(list)++; printf("target got inserted at next of the adderess\n"); return 1;
-    }
-
-    // initiation situation
-    if (list->head == NULL) {
-        head(list) = (listNode *) malloc(sizeof(listNode)); head(list)->data = *data; head(list)->link = NULL;
-        length(list)++; printf("target got inserted at head\n"); return 0;
-    }
-
-    // not initiation situation
-    listNode *prev; int error;
-    if ((error = seq_search(list->head, data->id, &prev)) < 0) {
-        link(prev) = (listNode *)malloc(sizeof(listNode));
-        link(prev)->data = *data; link(prev)->link = NULL;
-        length(list)++; printf("target got inserted at end\n"); return 1;
-    } else {printf("target already exist!\n"); return -1;}
+    return;
 }
 
-listNode *tmp;
-int delete(linkedList *list, int target) {
-    // delete head
-    if ((list->head->data).id == target) {tmp = head(list); head(list) = link(list->head); free(tmp); length(list)--; return 1;}
+void list_destroy(List *list) {
+    void *data;
 
-    // delete not head
-    listNode *prev; int error;
-    if ((error = seq_search(list->head, target, &prev)) > 0) {
-        tmp = link(prev); link(prev) = link(prev)->link; free(tmp);
-        length(list)--; return 1;
-    } else {printf("taget do not exist\n"); return -1;}  // target does not exist on the list
+    while (list_size(list) > 0) {
+        if (list_rem_next(list, NULL, (void**)&data) == 0 && list->destroy != NULL) {
+            list->destroy(data);
+        }
+    } // while
+
+    memset(list, 0, sizeof(List));
 }
 
-listNode *temp_curr;
-void reverse(linkedList *list) {
-    // empty list termination
-    if (L->head == NULL) {printf("empty list\n"); return;};
+int list_ins_next(List *list, ListElmt *element, const void *data) {
+    ListElmt *new_element;
 
-    // reverse the list
-    listNode *curr = head(list);
-    while (curr->link != NULL) {
-        temp_curr = link(curr); link(curr) = link(curr)->link;
-        link(temp_curr) = head(list); head(list) = temp_curr;
+    if ((new_element = (ListElmt *)malloc(sizeof(ListElmt))) == NULL) {
+        return -1;
     }
 
-    printList(list);  // print the list
+    new_element->data = (void *)data;
+
+    if (element == NULL) {
+        if (list_size(list) == 0) {
+            list->tail = new_element;
+        }
+    } else {
+        if (element->next == NULL) {
+            list->tail = new_element;
+        }
+        new_element->next = element->next;
+        element->next = new_element;
+    }
+
+    list->size += 1;
+
+    return 0;
 }
 
-int getLength(linkedList *list) {return length(list);}
+int list_rem_next(List *list, ListElmt *element, void **data) {
+    ListElmt *old_element;
+
+    if (list_size(list) == 0) {
+        return -1;
+    }
+
+    if (element == NULL) {
+        *data = list->head->data;
+        old_element = list->head;
+        list->head = list->head->next;
+
+        if (list_size(list) == 1) {
+            list->tail = NULL;  // considered that tail doesn't exist in this case
+        }
+    } else {
+        if (element->next == NULL) {
+            return -1;
+        }
+
+        *data = element->next->data;
+        old_element = element->next;
+        element->next = element->next->next;
+
+        if (element->next == NULL) {
+            list->tail = element;
+        }
+    }
+
+    free(old_element);
+    list->size -= 1;
+
+    return 0;
+}
